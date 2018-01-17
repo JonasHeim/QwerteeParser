@@ -18,7 +18,9 @@ The bot can notify ~~all registered user~~ the bot_owner automatically (default 
 
 Current implemented commands:
 - /start
-  Welcome the user and send all current available commands
+  Welcome the user and send a list of current available commands.
+- /help
+  Response with a list of current available commands.
 - /get
   Response with the current offers from [Qwertee](http://www.qwertee.com)
 - /register
