@@ -52,15 +52,78 @@ def get(bot, update):
 #/register command; register a user for daily notifications
 def register(bot, update):
 	bot.sendMessage(chat_id=update.message.chat_id, text="Registering...")
-	bot.sendMessage(chat_id=update.message.chat_id, text="Not yet implemented...")
-	# TODO in .xml Datei user_id, evtl. username schreiben
+
+	# get set of chat_id from registered users in file \"notification_user\"
+	notification_set = set(line.strip() for line in open('notification_user', 'r'))
+
+	if notification_set is not None:
+
+		# test if chat_id is already in set
+		if str(update.message.chat_id) in notification_set:
+			# notify user that he is already registered
+			bot.sendMessage(chat_id=update.message.chat_id, text="You are already registered for the daily notifications.\nIf you'd like to unregister, please send me the /unregister command.")
+		else:
+			# new chat_id, add to set
+			notification_set.add(update.message.chat_id)
+
+			print "Adding user ",update.message.chat_id, " to file."
+
+			# overwrite file
+			notification_file = open('notification_user', 'w')
+			if notification_file is not None:
+				# write to file
+				for chat_id in notification_set:
+					print "Write chat_id ",chat_id," to file."
+					notification_file.write("%s\n" % chat_id)
+				notification_file.close()
+				
+				#notify user about successfully registering
+				bot.sendMessage(chat_id=update.message.chat_id, text="You are now registered for the daily notification.")
+				
+			else:
+				# notify user about internal error
+				bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while registering...")
+	else:
+		bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while registering...")
+
 
 #/unregister command; unregister a user for daily notifications
 def unregister(bot, update):
 	bot.sendMessage(chat_id=update.message.chat_id, text="Unregistering...")
-	bot.sendMessage(chat_id=update.message.chat_id, text="Not yet implemented...")
-	# TODO aus .xml Datei user_id löschen
-	
+
+	# get set of chat_id from registered users in file \"notification_user\"
+	notification_set = set(line.strip() for line in open('notification_user', 'r'))
+
+	if notification_set is not None:
+
+		# test if chat_id is already in set
+		if str(update.message.chat_id) in notification_set:
+			# delete chat_id from set
+			notification_set.remove(str(update.message.chat_id))
+
+			print "Deleting user ",update.message.chat_id," from file."
+
+			# write updated set back to file
+			notification_file = open('notification_user', 'w')
+			if notification_file is not None:
+				# write to file
+				for chat_id in notification_set:
+					print "Write chat_id ",chat_id," to file."
+					notification_file.write("%s\n" % chat_id)
+				notification_file.close()
+				
+				#notify user about successfully registering
+				bot.sendMessage(chat_id=update.message.chat_id, text="You are not longer registered for the daily notification.")
+				
+			else:
+				# notify user about internal error
+				bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while unregistering...")
+		else:
+			# notify user that he is not registered
+			bot.sendMessage(chat_id=update.message.chat_id, text="It seems that you are not registered for the daily notification yet.\nIf you'd like to register, please send me the /register command.")			
+	else:
+		bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while unregistering...")
+
 
 #unknown command
 def unknown(bot, update):
@@ -240,14 +303,17 @@ def main():
 		qwertee_tees = parse_qwertee()
 
 		if qwertee_tees is not None:
-			bot.send_message(chat_id=telegram_bot_owner_chat_id, text="New offers from qwertee.com")
-			for s in qwertee_tees:
-				print "Got ", s.name, ", ", s.price, ", and ", s.picture_link
-				bot.send_photo(chat_id=telegram_bot_owner_chat_id, photo=s.picture_link[2:])
-				bot.send_message(chat_id=telegram_bot_owner_chat_id, text=s.name+" - "+s.price+" Euro.")
-		else:
-			bot.sendMessage(chat_id=telegram_bot_owner_chat_id, text="Error parsing qwertee.com. Sorry :(")
+			# get set of chat_id from registered users in file \"notification_user\"
+			notification_set = set(line.strip() for line in open('notification_user', 'r'))
+			
+			for chat_id in notification_set:
+				# notify user
+				bot.send_message(chat_id=chat_id, text="New offers from qwertee.com")
 
+				for s in qwertee_tees:
+					print "Got ", s.name, ", ", s.price, ", and ", s.picture_link
+					bot.send_photo(chat_id=chat_id, photo=s.picture_link[2:])
+					bot.send_message(chat_id=chat_id, text=s.name+" - "+s.price+" Euro.")
 
 	#
 	# Get Bot credentials from external file  ".bot_credentials"
