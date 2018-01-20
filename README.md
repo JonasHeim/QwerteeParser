@@ -14,7 +14,9 @@ bot_token = <your-API-token>
 bot_owner_chat_id = <chat_id_of_bot_owner>
 ```
 
-The bot can notify ~~all registered user~~ the bot_owner automatically (default once per day at 09:00 AM) about the offers.
+The bot can notify all registered user automatically (default once per day at 09:00 AM) about the offers.
+
+When registering, the chat_id of the user is saved to a set (unique); and when unregistering the chat_id will be deleted.
 
 Current implemented commands:
 - /start
@@ -24,9 +26,12 @@ Current implemented commands:
 - /get
   Response with the current offers from [Qwertee](http://www.qwertee.com)
 - /register
-  ~~Register a new user for the daily notification about the offers~~ TODO
+  Register a new user for the daily notification about the offers
 - /unregister
-~~Unregister a new user from the daily notification about the offers~~ TODO
+  Unregister a new user from the daily notification about the offers
+
+Planned:
+/
 
 
 
