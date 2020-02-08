@@ -2,3 +2,4 @@
 .bot_credentials
 notification_user
 *.html
+*.log
