@@ -4,24 +4,16 @@
 import telegram
 from telegram.ext import Updater, MessageHandler, CommandHandler, Filters
 from bs4 import BeautifulSoup
-import subprocess
 import logging
-import sys
 import configparser
-import sched
-import time
-from datetime import datetime
-from datetime import time
 import urllib.request, urllib.error, urllib.parse
+from datetime import datetime, time
 
 #Class for Qwertee Shirt element
 class Qwertee_Tee:
 	name = "Unknown name"
 	price = 0
 	picture_link = ""
-
-#Logging-stuff
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 #/start command
 def start(update, context):
@@ -298,6 +290,11 @@ def send_notification(context):
 
 def main():
 
+	#Logging-stuff
+	logging.basicConfig(filename="QwerteeParserBot.log", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+	logging.info("QwerteeParserBot started.")
+
 	# Create file for user list if not exist
 	tmp_file = open('notification_user', 'w')
 	tmp_file.close()
@@ -345,15 +342,15 @@ def main():
 	#unknown command, must be added last!
 	unknownHandler = MessageHandler(Filters.command, unknown)
 	QwerteeBotDispatcher.add_handler(unknownHandler)
+
+	logging.info("Commands registered.")
 	
 	#initial download of page
 	fetch_website()
 	
-	#set up timer for cyclic parsing
-	job_queue = QwerteeBotUpdater.job_queue
 	#call function every day at 09:00
-	job_queue.run_daily(send_notification, time(hour=9, minute=0, second=0))
-
+	job_queue = QwerteeBotUpdater.job_queue
+	job_queue.run_daily(send_notification, time(9, 00, 00))
 
 	#Run bot	
 	QwerteeBotUpdater.start_polling()
