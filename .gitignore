@@ -1,8 +1,4 @@
-#Ignore telegram API credentials
+.vscode
 .bot_credentials
-
-#List of users that get the daily notification
 notification_user
-
-#website qwertee.com
-qwertee.html
+*.html
