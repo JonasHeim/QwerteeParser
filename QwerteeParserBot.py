@@ -24,35 +24,35 @@ class Qwertee_Tee:
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 #/start command
-def start(bot, update):
+def start(update, context):
 
 	#send personalized welcome message to user (if user got a username), else send default welcome message
 	if update.message.from_user.username is not None:
-		bot.sendMessage(chat_id=update.message.chat_id, text="Hi "+str(update.message.from_user.username)+", i am a bot for parsing qwertee.com for daily offers.\nTo get a list of my commands please send me  a /help message.")
+		context.bot.sendMessage(chat_id=update.message.chat_id, text="Hi "+str(update.message.from_user.username)+", i am a bot for parsing qwertee.com for daily offers.\nTo get a list of my commands please send me  a /help message.")
 	else:
-		bot.sendMessage(chat_id=update.message.chat_id, text="Hi, i am a bot for parsing qwertee.com for daily offers.\nTo get a list of my commands please send me  a /help message.")
+		context.bot.sendMessage(chat_id=update.message.chat_id, text="Hi, i am a bot for parsing qwertee.com for daily offers.\nTo get a list of my commands please send me  a /help message.")
 
 	#print out user details
 	logging.info("User: %s - chat_id: %s", str(update.message.from_user.username), update.message.chat_id)
 
 
 #/get command; get current offers from website
-def get(bot, update):
-	bot.sendMessage(chat_id=update.message.chat_id, text="Parsing qwertee.com ...")
+def get(update, context):
+	context.bot.sendMessage(chat_id=update.message.chat_id, text="Parsing qwertee.com ...")
 	
 	qwertee_tees = parse_qwertee()
 
 	if qwertee_tees is not None:
 		for s in qwertee_tees:
 			print("Got " + s.name + ", " + s.price + ", and " + s.picture_link)
-			bot.send_photo(chat_id=update.message.chat_id, photo=s.picture_link)
-			bot.send_message(chat_id=update.message.chat_id, text=s.name+" - "+s.price+" Euro.")
+			context.bot.send_photo(chat_id=update.message.chat_id, photo=s.picture_link)
+			context.bot.send_message(chat_id=update.message.chat_id, text=s.name+" - "+s.price+" Euro.")
 	else:
-		bot.sendMessage(chat_id=update.message.chat_id, text="Error parsing qwertee.com. Sorry :(")
+		context.bot.sendMessage(chat_id=update.message.chat_id, text="Error parsing qwertee.com. Sorry :(")
 	
 #/register command; register a user for daily notifications
-def register(bot, update):
-	bot.sendMessage(chat_id=update.message.chat_id, text="Registering...")
+def register(update, context):
+	context.bot.sendMessage(chat_id=update.message.chat_id, text="Registering...")
 
 	# get set of chat_id from registered users in file \"notification_user\"
 	notification_set = set(line.strip() for line in open('notification_user', 'r'))
@@ -62,7 +62,7 @@ def register(bot, update):
 		# test if chat_id is already in set
 		if str(update.message.chat_id) in notification_set:
 			# notify user that he is already registered
-			bot.sendMessage(chat_id=update.message.chat_id, text="You are already registered for the daily notifications.\nIf you'd like to unregister, please send me the /unregister command.")
+			context.bot.sendMessage(chat_id=update.message.chat_id, text="You are already registered for the daily notifications.\nIf you'd like to unregister, please send me the /unregister command.")
 		else:
 			# new chat_id, add to set
 			notification_set.add(update.message.chat_id)
@@ -79,18 +79,18 @@ def register(bot, update):
 				notification_file.close()
 				
 				#notify user about successfully registering
-				bot.sendMessage(chat_id=update.message.chat_id, text="You are now registered for the daily notification.")
+				context.bot.sendMessage(chat_id=update.message.chat_id, text="You are now registered for the daily notification.")
 				
 			else:
 				# notify user about internal error
-				bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while registering...")
+				context.bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while registering...")
 	else:
-		bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while registering...")
+		context.bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while registering...")
 
 
 #/unregister command; unregister a user for daily notifications
-def unregister(bot, update):
-	bot.sendMessage(chat_id=update.message.chat_id, text="Unregistering...")
+def unregister(update, context):
+	context.bot.sendMessage(chat_id=update.message.chat_id, text="Unregistering...")
 
 	# get set of chat_id from registered users in file \"notification_user\"
 	notification_set = set(line.strip() for line in open('notification_user', 'r'))
@@ -114,29 +114,29 @@ def unregister(bot, update):
 				notification_file.close()
 				
 				#notify user about successfully registering
-				bot.sendMessage(chat_id=update.message.chat_id, text="You are not longer registered for the daily notification.")
+				context.bot.sendMessage(chat_id=update.message.chat_id, text="You are not longer registered for the daily notification.")
 				
 			else:
 				# notify user about internal error
-				bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while unregistering...")
+				context.bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while unregistering...")
 		else:
 			# notify user that he is not registered
-			bot.sendMessage(chat_id=update.message.chat_id, text="It seems that you are not registered for the daily notification yet.\nIf you'd like to register, please send me the /register command.")			
+			context.bot.sendMessage(chat_id=update.message.chat_id, text="It seems that you are not registered for the daily notification yet.\nIf you'd like to register, please send me the /register command.")			
 	else:
-		bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while unregistering...")
+		context.bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, but there was an internal error while unregistering...")
 
 
 #unknown command
-def unknown(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Sorry, i don't know this command :(")
-	help(bot, update)
+def unknown(update, context):
+	context.bot.send_message(chat_id=update.message.chat_id, text="Sorry, i don't know this command :(")
+	help(update, context)
 
 #help command; print list of commands
-def help(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Here's a list of my current known commands.")
-	bot.send_message(chat_id=update.message.chat_id, text="/get - Get current offers from qwertee.com")
-	bot.send_message(chat_id=update.message.chat_id, text="/register - Register yourself for the daily Qwertee notification")
-	bot.send_message(chat_id=update.message.chat_id, text="/unregister - Unregister yourself from the daily Qwertee notification")	
+def help(update, context):
+	context.bot.send_message(chat_id=update.message.chat_id, text="Here's a list of my current known commands.")
+	context.bot.send_message(chat_id=update.message.chat_id, text="/get - Get current offers from qwertee.com")
+	context.bot.send_message(chat_id=update.message.chat_id, text="/register - Register yourself for the daily Qwertee notification")
+	context.bot.send_message(chat_id=update.message.chat_id, text="/unregister - Unregister yourself from the daily Qwertee notification")	
 	
 
 def parse_qwertee():
@@ -242,16 +242,6 @@ def parse_qwertee():
 		if tee_picture_link is None:
 			print("Could not find the link to the picture of tee " + tee_name)
 			return None
-		
-		print("tee_picture_link - " + str(tee_picture_link))
-
-		tmp_tee_picture_link_name = tee_picture_link.split("/")
-
-		print("tmp_tee_picture_link_name - " + str(tmp_tee_picture_link_name))
-
-		tee_picture_link_name = tmp_tee_picture_link_name[len(tmp_tee_picture_link_name)-1]
-
-		print("tmp_tee_picture_link_name - " + str(tmp_tee_picture_link_name))
 
 		#Got all i need, print the infos and add it to the return list 
 		print("Limitiertes Tee: ", tee_name, " fuer ", tee_price, "Euro.")
@@ -269,18 +259,25 @@ def parse_qwertee():
 	#Return list of Tee objects
 	return return_list_Qwertee_Tees
 
-#routine to send notification to all registered users
-def send_notification(bot, job):
-	print("Loading qwertee.com")
-
+def fetch_website():
 	url = 'http://www.qwertee.com'
 
-	response = urllib.request.urlopen(url)
+	user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+	headers={'User-Agent':user_agent,} 
+
+	req = urllib.request.Request(url, headers=headers)
+	response = urllib.request.urlopen(req)
 	webContent = response.read()
 
 	f = open('qwertee.html', 'wb')
 	f.write(webContent)
 	f.close
+
+
+#routine to send notification to all registered users
+def send_notification(context):
+
+	fetch_website()
 
 	print("Sending notification...")
 
@@ -292,49 +289,34 @@ def send_notification(bot, job):
 		
 		for chat_id in notification_set:
 			# notify user
-			bot.send_message(chat_id=chat_id, text="New offers from qwertee.com")
+			context.bot.send_message(chat_id=chat_id, text="New offers from qwertee.com")
 
 			for s in qwertee_tees:
 				print("Got ", s.name, ", ", s.price, ", and ", s.picture_link)
-				bot.send_photo(chat_id=chat_id, photo=s.picture_link[2:])
-				bot.send_message(chat_id=chat_id, text=s.name+" - "+s.price+" Euro.")
+				context.bot.send_photo(chat_id=chat_id, photo=s.picture_link[2:])
+				context.bot.send_message(chat_id=chat_id, text=s.name+" - "+s.price+" Euro.")
 
 def main():
 
-	#
-	# Get Bot credentials from external file  ".bot_credentials"
-	#
+	# Create file for user list if not exist
 	tmp_file = open('notification_user', 'w')
 	tmp_file.close()
 
+	# Get telegram API token and chat_id of bot owner from file ".bot_credentials"
 	telegram_config = configparser.ConfigParser()
 	telegram_config.read("./.bot_credentials")
 	telegram_bot_token = telegram_config.get("configuration", "bot_token")
-
-	#
-	# Get chat_id of owner of the bot from external file ".bot_credentials"
-	#
 	telegram_bot_owner_chat_id = telegram_config.get("configuration", "bot_owner_chat_id")
 
  	#
 	# Set up connection to Telegram-API
 	#
-
-	QwerteeBotUpdater = Updater(token=telegram_bot_token)
+	QwerteeBotUpdater = Updater(token=telegram_bot_token, use_context=True)
 	QwerteeBotDispatcher = QwerteeBotUpdater.dispatcher
 	QwerteeBot = QwerteeBotUpdater.bot
 
-	#
 	# Notify bot owner that bot has started
-	#
-
 	QwerteeBot.send_message(chat_id=telegram_bot_owner_chat_id, text="QwerteeParserBot was started at " + datetime.now().strftime('%d.%m.%y (%a) at %H:%M:%S'))
-		
-	#	
-	#Get .html file from qwertee.com
-	#
-
-	#subprocess.call(['./getSite.sh'])
 
 	#
 	#register commands
@@ -365,34 +347,17 @@ def main():
 	QwerteeBotDispatcher.add_handler(unknownHandler)
 	
 	#initial download of page
-	url = 'http://www.qwertee.com'
-
-	user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-	headers={'User-Agent':user_agent,} 
-
-	req = urllib.request.Request(url, headers=headers)
-	response = urllib.request.urlopen(req)
-	webContent = response.read()
-
-	f = open('qwertee.html', 'wb')
-	f.write(webContent)
-	f.close
-
-	#
+	fetch_website()
+	
 	#set up timer for cyclic parsing
-	#
 	job_queue = QwerteeBotUpdater.job_queue
 	#call function every day at 09:00
-	job_daily_notification = job_queue.run_daily(send_notification, time(hour=9, minute=0, second=0))
+	job_queue.run_daily(send_notification, time(hour=9, minute=0, second=0))
 
-	#
-	#Run bot
-	#
-	
+
+	#Run bot	
 	QwerteeBotUpdater.start_polling()
-
 	QwerteeBotUpdater.idle()
-
 
 if __name__ == '__main__':
 	main()
