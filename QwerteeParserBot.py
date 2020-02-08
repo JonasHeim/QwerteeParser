@@ -272,7 +272,7 @@ def main():
 	logging.info("QwerteeParserBot started.")
 
 	# Create file for user list if not exist
-	tmp_file = open('notification_user', 'w')
+	tmp_file = open('notification_user', 'a')
 	tmp_file.close()
 
 	# Get telegram API token and chat_id of bot owner from file ".bot_credentials"
