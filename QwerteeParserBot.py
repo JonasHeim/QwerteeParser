@@ -24,7 +24,7 @@ def start(update, context):
 	else:
 		context.bot.sendMessage(chat_id=update.message.chat_id, text="Hi, i am a bot for parsing qwertee.com for daily offers.\nTo get a list of my commands please send me  a /help message.")
 
-	#print out user details
+	#out user details
 	logging.info("User: %s - chat_id: %s", str(update.message.from_user.username), update.message.chat_id)
 
 
@@ -36,7 +36,7 @@ def get(update, context):
 
 	if qwertee_tees is not None:
 		for s in qwertee_tees:
-			print("Got " + s.name + ", " + s.price + ", and " + s.picture_link)
+			logging.info("Got %s for %s€ (%s)", s.name, s.price, s.picture_link)
 			context.bot.send_photo(chat_id=update.message.chat_id, photo=s.picture_link)
 			context.bot.send_message(chat_id=update.message.chat_id, text=s.name+" - "+s.price+" Euro.")
 	else:
@@ -59,14 +59,13 @@ def register(update, context):
 			# new chat_id, add to set
 			notification_set.add(update.message.chat_id)
 
-			print("Adding user " + str(update.message.chat_id) + " to file.")
+			logging.info("Adding user %s (ID %s) to file", str(update.message.from_user), str(update.message.chat_id))
 
 			# overwrite file
 			notification_file = open('notification_user', 'w')
 			if notification_file is not None:
 				# write to file
 				for chat_id in notification_set:
-					print("Write chat_id " + str(chat_id) + " to file.")
 					notification_file.write("%s\n" % chat_id)
 				notification_file.close()
 				
@@ -94,14 +93,13 @@ def unregister(update, context):
 			# delete chat_id from set
 			notification_set.remove(str(update.message.chat_id))
 
-			print("Deleting user " + str(update.message.chat_id) + " from file.")
+			logging.info("Deleting user %s (ID %s) from file", str(update.message.from_user), str(update.message.chat_id))
 
 			# write updated set back to file
 			notification_file = open('notification_user', 'w')
 			if notification_file is not None:
 				# write to file
 				for chat_id in notification_set:
-					print("Write chat_id " + str(chat_id) + " to file.")
 					notification_file.write("%s\n" % chat_id)
 				notification_file.close()
 				
@@ -134,7 +132,7 @@ def help(update, context):
 def parse_qwertee():
 	#Start parsing qwertee.com
 
-	print("QwerteeBot - Polling for https://www.qwertee.com...")
+	logging.info("QwerteeBot - Polling for https://www.qwertee.com...")
 
 	return_list_Qwertee_Tees = []
 
@@ -146,31 +144,22 @@ def parse_qwertee():
 	big_slides_wrap = soup.find("div", class_="big-slides-wrap")
 	
 	if big_slides_wrap is None:
-		print("Could not find a div of class \"big-slide-wrap\"")
+		logging.warning("Could not find a div of class \"big-slide-wrap\"")
 		return None
-	
-	#print "Found a div of class \"big-slide-wrap\""
-	
+		
 	# Get div with id "big-slide tee tee-last-chance"
 	find = big_slides_wrap.find_all("div", class_="big-slide tee tee-last-chance")
 	if find is None:
-		print("Could not find a element of class \"big-slide tee tee-last-chance\"")
+		logging.warning("Could not find a element of class \"big-slide tee tee-last-chance\"")
 		return None
-	
-	#print "Found a div of class \"big-slide tee tee-last-chance\""
-	
-	#Iterate through all items of this class and get the picture source link
-	#print "Got ",len(find)," elements"
 
 	for limited_tee_wrap in find:
 	
 		index_tee = limited_tee_wrap.find("div", class_="index-tee")
 	
 		if index_tee is None:
-			print("Could not find a element of class \"index-tee\"")
+			logging.warning("Could not find a element of class \"index-tee\"")
 			return None
-	
-		#print "Found a div of class \"index-tee\""
 	
 		#Save name and price of tee
 		tee_name = index_tee["data-name"]
@@ -180,63 +169,50 @@ def parse_qwertee():
 		find2 = limited_tee_wrap.find("div", class_="buy-wrap")
 		
 		if find2 is None:
-			print("Could not find a element of class \"buy-wrap\"")
+			logging.warning("Could not find a element of class \"buy-wrap\"")
 			return None
-	
-		#print "Found a div of class \"buy-wrap\""
-
 		# Get children-div with class "buy"
 		find3 = find2.find("div", class_="buy")
 
 		if find3 is None:
-			print("Could not find a element of class \"buy\"")
+			logging.warning("Could not find a element of class \"buy\"")
 			return None
-
-		#print "Found a div of class \"buy\""
 
 		# Get children-div with class "design-dynamic-image-wrap"
 		find4 = find3.find("div", class_="design-dynamic-image-wrap")
 
 		if find4 is None:
-			print("Could not find a element of class \"design-dynamic-image-wrap\"")
+			logging.warning("Could not find a element of class \"design-dynamic-image-wrap\"")
 			return None
-	
-		#print "Found a div of class \"design-dynamic-image-wrap\""
 
 		# Get children-div with class "mens-dynamic-image design-dynamic-image"
 		find5 = find4.find("div", class_="mens-dynamic-image design-dynamic-image")
 
 		if find5 is None:
-			print("Could not find a element of class \"mens-dynamic-image design-dynamic-image\"")
+			logging.warning("Could not find a element of class \"mens-dynamic-image design-dynamic-image\"")
 			return None
 	
-		#print "Found a div of class \"mens-dynamic-image design-dynamic-image\""
-
 		# Get children with tag "picture"
 		find6 = find5.find("picture")
 
 		if find6 is None:
-			print("Could not find a element of tag \"picture\"")
+			logging.warning("Could not find a element of tag \"picture\"")
 			return None
 	
-		#print "Found a element of tag \"picture\""
-
 		# Get children with tag "img"
 		find6 = find5.find("img")
 
 		if find6 is None:
-			print("Could not find a element of tag \"img\"")
+			logging.warning("Could not find a element of tag \"img\"")
 			return None
-	
-		#print "Found a element of tag \"img\""
 
 		tee_picture_link = find6["src"]
 		if tee_picture_link is None:
-			print("Could not find the link to the picture of tee " + tee_name)
+			logging.warning("Could not find the link to the picture of tee %s", str(tee_name))
 			return None
 
 		#Got all i need, print the infos and add it to the return list 
-		print("Limitiertes Tee: ", tee_name, " fuer ", tee_price, "Euro.")
+		logging.info("Limitiertes Tee: %s fuer %s€", tee_name, tee_price)
 		
 		#Create Tee object
 		tmp_tee_obj = Qwertee_Tee()
@@ -271,7 +247,7 @@ def send_notification(context):
 
 	fetch_website()
 
-	print("Sending notification...")
+	logging.info("Sending notifications")
 
 	qwertee_tees = parse_qwertee()
 
@@ -281,10 +257,10 @@ def send_notification(context):
 		
 		for chat_id in notification_set:
 			# notify user
+			logging.info("Notify user with ID %s", chat_id)
 			context.bot.send_message(chat_id=chat_id, text="New offers from qwertee.com")
 
 			for s in qwertee_tees:
-				print("Got ", s.name, ", ", s.price, ", and ", s.picture_link)
 				context.bot.send_photo(chat_id=chat_id, photo=s.picture_link[2:])
 				context.bot.send_message(chat_id=chat_id, text=s.name+" - "+s.price+" Euro.")
 
