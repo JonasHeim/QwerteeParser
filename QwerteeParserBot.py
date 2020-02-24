@@ -7,13 +7,17 @@ from bs4 import BeautifulSoup
 import logging
 import configparser
 import urllib.request, urllib.error, urllib.parse
-from datetime import datetime, time
+from datetime import datetime, time, timezone, timedelta
 
 #Class for Qwertee Shirt element
 class Qwertee_Tee:
 	name = "Unknown name"
 	price = 0
 	picture_link = ""
+
+def get_timezone():
+	#UTC/GMT + 1h
+	return timezone(timedelta(hours=1))
 
 #/start command
 def start(update, context):
@@ -261,7 +265,7 @@ def send_notification(context):
 			context.bot.send_message(chat_id=chat_id, text="New offers from qwertee.com")
 
 			for s in qwertee_tees:
-				context.bot.send_photo(chat_id=chat_id, photo=s.picture_link[2:])
+				context.bot.send_photo(chat_id=chat_id, photo=s.picture_link)
 				context.bot.send_message(chat_id=chat_id, text=s.name+" - "+s.price+" Euro.")
 
 def main():
@@ -289,7 +293,7 @@ def main():
 	QwerteeBot = QwerteeBotUpdater.bot
 
 	# Notify bot owner that bot has started
-	QwerteeBot.send_message(chat_id=telegram_bot_owner_chat_id, text="QwerteeParserBot was started at " + datetime.now().strftime('%d.%m.%y (%a) at %H:%M:%S'))
+	QwerteeBot.send_message(chat_id=telegram_bot_owner_chat_id, text="QwerteeParserBot was started at " + datetime.now(get_timezone()).strftime('%d.%m.%y (%a) at %H:%M:%S'))
 
 	#
 	#register commands
@@ -326,7 +330,7 @@ def main():
 	
 	#call function every day at 09:00
 	job_queue = QwerteeBotUpdater.job_queue
-	job_queue.run_daily(send_notification, time(9, 00, 00))
+	job_queue.run_daily(send_notification, time(9, 0, 0, 0, tzinfo=get_timezone()))
 
 	#Run bot	
 	QwerteeBotUpdater.start_polling()
